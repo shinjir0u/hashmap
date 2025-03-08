@@ -38,8 +38,13 @@ class HashMap {
     const entry = this.#entry(bucket, key);
     if (entry) entry.value = value;
     else bucket.push({ key, value });
-    if (this.capacity * this.loadFactor > this.buckets.length) console.log();
-    // increase the hashmap and reallocate the items
+
+    if (this.length() > this.capacity * this.loadFactor) {
+      const entries = this.entries();
+      this.buckets = new Array(32);
+      this.capacity = this.buckets.length;
+      for (let entry of entries) this.set(entry[0], entry[1]);
+    }
   }
 
   get(key) {
@@ -48,8 +53,66 @@ class HashMap {
     return entry;
   }
 
+  has(key) {
+    const bucket = this.#bucket(key);
+    const entry = this.#entry(bucket, key);
+    return !!entry;
+  }
+
+  remove(key) {
+    const bucket = this.#bucket(key);
+    const entry = this.#entry(bucket, key);
+    if (entry) {
+      const entryIndex = bucket.findIndex((entry) => entry.key === key);
+      bucket.splice(entry, 1);
+    }
+    return !!entry;
+  }
+
+  length() {
+    let length = 0;
+    for (let bucket of this.buckets) {
+      if (bucket) length += bucket.length;
+    }
+    return length;
+  }
+
+  clear() {
+    this.buckets = new Array(16);
+  }
+
+  keys() {
+    let keys = [];
+    for (let bucket of this.buckets) {
+      if (bucket) {
+        for (let entry of bucket) keys.push(entry.key);
+      }
+    }
+    return keys;
+  }
+
+  values() {
+    let values = [];
+    for (let bucket of this.buckets) {
+      if (bucket) {
+        for (let entry of bucket) values.push(entry.value);
+      }
+    }
+    return values;
+  }
+
+  entries() {
+    let entries = [];
+    for (let bucket of this.buckets) {
+      if (bucket) {
+        for (let entry of bucket) entries.push([entry.key, entry.value]);
+      }
+    }
+    return entries;
+  }
+
   log() {
-    console.log(this.buckets);
+    console.log(this.length(), this.buckets);
   }
 }
 
@@ -66,5 +129,4 @@ test.set("ice cream", "white");
 test.set("jacket", "blue");
 test.set("kite", "pink");
 test.set("lion", "golden");
-test.log();
-console.log(test.get("lon"));
+test.set("me", "black");
