@@ -17,37 +17,35 @@ class HashMap {
     return hashCode;
   }
 
-  set(key, value) {
+  #bucket(key) {
     const index = this.#hash(key);
     if (index < 0 || index >= this.buckets.length) {
       throw new Error("Trying to access index out of bounds");
     }
-    let bucket = this.buckets[index];
-    if (!bucket) {
-      this.buckets[index] = [{ key, value }];
-      return;
-    }
+    if (!this.buckets[index]) this.buckets[index] = [];
+    return this.buckets[index];
+  }
+
+  #entry(bucket, key) {
     for (let entry of bucket) {
-      if (entry.key === key) {
-        entry.value = value;
-        return;
-      }
+      if (entry.key === key) return entry;
     }
-    this.buckets[index].push({ key, value });
+    return null;
+  }
+
+  set(key, value) {
+    const bucket = this.#bucket(key);
+    const entry = this.#entry(bucket, key);
+    if (entry) entry.value = value;
+    else bucket.push({ key, value });
     if (this.capacity * this.loadFactor > this.buckets.length) console.log();
     // increase the hashmap and reallocate the items
   }
 
   get(key) {
-    const index = this.#hash(key);
-    if (index < 0 || index >= this.buckets.length) {
-      throw new Error("Trying to access index out of bounds");
-    }
-    let bucket = this.buckets[index];
-    if (bucket) {
-      for (let entry of bucket) if (entry.key === key) return entry.value;
-      return null;
-    }
+    const bucket = this.#bucket(key);
+    const entry = this.#entry(bucket, key);
+    return entry;
   }
 
   log() {
@@ -69,3 +67,4 @@ test.set("jacket", "blue");
 test.set("kite", "pink");
 test.set("lion", "golden");
 test.log();
+console.log(test.get("lon"));
