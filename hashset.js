@@ -1,4 +1,4 @@
-class HashMap {
+class HashSet {
   constructor() {
     this.buckets = new Array(16);
     this.capacity = this.buckets.length;
@@ -33,17 +33,16 @@ class HashMap {
     return null;
   }
 
-  set(key, value) {
+  set(key) {
     const bucket = this.#bucket(key);
     const entry = this.#entry(bucket, key);
-    if (entry) entry.value = value;
-    else bucket.push({ key, value });
+    if (!entry) bucket.push({ key });
 
     if (this.length() > this.capacity * this.loadFactor) {
       const entries = this.entries();
       this.buckets = new Array(32);
       this.capacity = this.buckets.length;
-      for (let entry of entries) this.set(entry[0], entry[1]);
+      for (let entry of entries) this.set(entry[0]);
     }
   }
 
@@ -81,31 +80,11 @@ class HashMap {
     this.buckets = new Array(16);
   }
 
-  keys() {
-    let keys = [];
-    for (let bucket of this.buckets) {
-      if (bucket) {
-        for (let entry of bucket) keys.push(entry.key);
-      }
-    }
-    return keys;
-  }
-
-  values() {
-    let values = [];
-    for (let bucket of this.buckets) {
-      if (bucket) {
-        for (let entry of bucket) values.push(entry.value);
-      }
-    }
-    return values;
-  }
-
   entries() {
     let entries = [];
     for (let bucket of this.buckets) {
       if (bucket) {
-        for (let entry of bucket) entries.push([entry.key, entry.value]);
+        for (let entry of bucket) entries.push([entry.key]);
       }
     }
     return entries;
@@ -115,5 +94,3 @@ class HashMap {
     console.log(this.length(), this.buckets);
   }
 }
-
-export default HashMap;
