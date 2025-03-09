@@ -1,3 +1,5 @@
+import LinkedList from "./linkedList.js";
+
 class HashSet {
   constructor() {
     this.buckets = new Array(16);
@@ -22,13 +24,15 @@ class HashSet {
     if (index < 0 || index >= this.buckets.length) {
       throw new Error("Trying to access index out of bounds");
     }
-    if (!this.buckets[index]) this.buckets[index] = [];
+    if (!this.buckets[index]) this.buckets[index] = new LinkedList();
     return this.buckets[index];
   }
 
   #entry(bucket, key) {
-    for (let entry of bucket) {
-      if (entry.key === key) return entry;
+    let currentEntry = bucket.getHead();
+    while (currentEntry !== null && currentEntry.value !== null) {
+      if (currentEntry.value.key === key) return currentEntry.value;
+      else currentEntry = currentEntry.nextNode;
     }
     return null;
   }
@@ -36,7 +40,7 @@ class HashSet {
   set(key) {
     const bucket = this.#bucket(key);
     const entry = this.#entry(bucket, key);
-    if (!entry) bucket.push({ key });
+    if (!entry) bucket.append({ key });
 
     if (this.length() > this.capacity * this.loadFactor) {
       const entries = this.entries();
@@ -62,8 +66,8 @@ class HashSet {
     const bucket = this.#bucket(key);
     const entry = this.#entry(bucket, key);
     if (entry) {
-      const entryIndex = bucket.findIndex((entry) => entry.key === key);
-      bucket.splice(entry, 1);
+        const entryIndex = bucket.find(entry);
+        bucket.removeAt(entryIndex);
     }
     return !!entry;
   }
@@ -71,7 +75,7 @@ class HashSet {
   length() {
     let length = 0;
     for (let bucket of this.buckets) {
-      if (bucket) length += bucket.length;
+      if (bucket) length += bucket.getSize();
     }
     return length;
   }
@@ -84,7 +88,12 @@ class HashSet {
     let entries = [];
     for (let bucket of this.buckets) {
       if (bucket) {
-        for (let entry of bucket) entries.push([entry.key]);
+        let currentEntry = bucket.getHead();
+        while (currentEntry !== null && currentEntry.value !== null) {
+          let entry = currentEntry.value;
+          entries.push([entry.key]);
+          currentEntry = currentEntry.nextNode;
+        }
       }
     }
     return entries;
@@ -94,3 +103,5 @@ class HashSet {
     console.log(this.length(), this.buckets);
   }
 }
+
+export default HashSet;

@@ -15,5 +15,6 @@ test.set("kite", "pink");
 test.set("kite", "whatever");
 test.set("lion", "golden");
 test.set("me", "black");
+test.remove("lion");
 test.log();
 console.log(test.length())

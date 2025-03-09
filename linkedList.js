@@ -1,4 +1,4 @@
-const { Node } = require("./node");
+import Node from "./node.js";
 
 class LinkedList {
   head;
@@ -61,6 +61,10 @@ class LinkedList {
   }
 
   pop() {
+    if (this.getSize() === 1) {
+        this.head = new Node();
+        return;
+    }
     let temp = this.head;
     let previousNode;
     while (temp !== this.getTail()) {

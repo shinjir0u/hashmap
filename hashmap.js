@@ -1,3 +1,5 @@
+import LinkedList from "./linkedList.js";
+
 class HashMap {
   constructor() {
     this.buckets = new Array(16);
@@ -22,13 +24,15 @@ class HashMap {
     if (index < 0 || index >= this.buckets.length) {
       throw new Error("Trying to access index out of bounds");
     }
-    if (!this.buckets[index]) this.buckets[index] = [];
+    if (!this.buckets[index]) this.buckets[index] = new LinkedList();
     return this.buckets[index];
   }
 
   #entry(bucket, key) {
-    for (let entry of bucket) {
-      if (entry.key === key) return entry;
+    let currentEntry = bucket.getHead();
+    while (currentEntry !== null && currentEntry.value !== null) {
+      if (currentEntry.value.key === key) return currentEntry.value;
+      else currentEntry = currentEntry.nextNode;
     }
     return null;
   }
@@ -37,7 +41,7 @@ class HashMap {
     const bucket = this.#bucket(key);
     const entry = this.#entry(bucket, key);
     if (entry) entry.value = value;
-    else bucket.push({ key, value });
+    else bucket.append({ key, value });
 
     if (this.length() > this.capacity * this.loadFactor) {
       const entries = this.entries();
@@ -63,8 +67,8 @@ class HashMap {
     const bucket = this.#bucket(key);
     const entry = this.#entry(bucket, key);
     if (entry) {
-      const entryIndex = bucket.findIndex((entry) => entry.key === key);
-      bucket.splice(entry, 1);
+      const entryIndex = bucket.find(entry);
+      bucket.removeAt(entryIndex);
     }
     return !!entry;
   }
@@ -72,7 +76,7 @@ class HashMap {
   length() {
     let length = 0;
     for (let bucket of this.buckets) {
-      if (bucket) length += bucket.length;
+      if (bucket) length += bucket.getSize();
     }
     return length;
   }
@@ -105,14 +109,19 @@ class HashMap {
     let entries = [];
     for (let bucket of this.buckets) {
       if (bucket) {
-        for (let entry of bucket) entries.push([entry.key, entry.value]);
+        let currentEntry = bucket.getHead();
+        while (currentEntry !== null && currentEntry.value !== null) {
+          let entry = currentEntry.value;
+          entries.push([entry.key, entry.value]);
+          currentEntry = currentEntry.nextNode;
+        }
       }
     }
     return entries;
   }
 
   log() {
-    console.log(this.length(), this.buckets);
+    console.dir(this.buckets);
   }
 }
 
